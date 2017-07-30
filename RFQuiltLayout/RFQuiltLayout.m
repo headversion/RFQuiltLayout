@@ -144,9 +144,9 @@
     
     int unrestrictedRow = 0;
     if (isVert)
-        unrestrictedRow = (CGRectGetMaxY(scrollFrame) / [self blockPixels].height)+1;
+        unrestrictedRow = ((CGRectGetMaxY(scrollFrame) - self.collectionView.contentInset.top - self.collectionView.contentInset.bottom) / [self blockPixels].height)+1;
     else
-        unrestrictedRow = (CGRectGetMaxX(scrollFrame) / [self blockPixels].width)+1;
+        unrestrictedRow = ((CGRectGetMaxX(scrollFrame)  - self.collectionView.contentInset.left - self.collectionView.contentInset.right)  / [self blockPixels].width)+1;
     
     [self fillInBlocksToUnrestrictedRow:self.prelayoutEverything? INT_MAX : unrestrictedRow];
 }
@@ -371,20 +371,25 @@
     CGPoint position = [self positionForIndexPath:path];
     CGSize elementSize = [self getBlockSizeForItemAtIndexPath:path];
     
-    CGRect contentRect = UIEdgeInsetsInsetRect(self.collectionView.frame, self.collectionView.contentInset);
+    CGRect rect ;
+    UICollectionView *collectionView = self.collectionView;
+    UIEdgeInsets inset = collectionView.contentInset;
+    CGRect contentRect = UIEdgeInsetsInsetRect(collectionView.frame, inset);
+    
     if (isVert) {
         float initialPaddingForContraintedDimension = (CGRectGetWidth(contentRect) - [self restrictedDimensionBlockSize]*self.blockPixels.width)/ 2;
-        return CGRectMake(position.x*self.blockPixels.width + initialPaddingForContraintedDimension,
-                          position.y*self.blockPixels.height,
+        rect = CGRectMake(position.x*self.blockPixels.width + initialPaddingForContraintedDimension,
+                          inset.top + position.y*self.blockPixels.height,
                           elementSize.width*self.blockPixels.width,
                           elementSize.height*self.blockPixels.height);
     } else {
         float initialPaddingForContraintedDimension = (CGRectGetHeight(contentRect) - [self restrictedDimensionBlockSize]*self.blockPixels.height)/ 2;
-        return CGRectMake(position.x*self.blockPixels.width,
-                          position.y*self.blockPixels.height + initialPaddingForContraintedDimension,
+        rect = CGRectMake(position.x*self.blockPixels.width,
+                          inset.top + position.y*self.blockPixels.height + initialPaddingForContraintedDimension,
                           elementSize.width*self.blockPixels.width,
                           elementSize.height*self.blockPixels.height);
     }
+    return rect;
 }
 
 
